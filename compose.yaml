@@ -4,7 +4,6 @@ services:
   web:
     image: registry.gitlab.com/smoores/storyteller:latest # For CUDA, use registry.gitlab.com/smoores/storyteller:cuda-latest
     # Uncomment for CUDA
-    # runtime: nvidia
     volumes:
       # This can be whatever you like; you can even use a
       # named volume rather than a bind mount, though it's easier
@@ -16,17 +15,20 @@ services:
       # https://code.visualstudio.com/remote/advancedcontainers/improve-performance#_use-a-targeted-named-volume
       - ~/Documents/Storyteller:/data:rw
     environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
       # Generate a cryptopgraphically secure random string,
       # e.g. with:
       #  openssl rand -base64 32
       - STORYTELLER_SECRET_KEY=/run/secrets/secret_key
       # Uncomment for CUDA
-      # - STORYTELLER_DEVICE=cuda
+      - STORYTELLER_DEVICE=cuda
     ports:
       - "8001:8001"
     secrets:
       - secret_key
-
+    devices:
+      - "/dev/nvidia0:/dev/nvidia0"  # map a specific GPU (for NVIDIA GPUs)
 secrets:
   secret_key:
     file: ./STORYTELLER_SECRET_KEY.txt
